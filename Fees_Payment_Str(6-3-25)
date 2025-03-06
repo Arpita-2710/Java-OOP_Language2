@@ -1,0 +1,179 @@
+import java.util.Scanner;
+
+class CollegeFeePaymentSystem {
+
+    // BankAccount class to simulate bank balance
+    static class BankAccount {
+        int studentId;  // This links the bank account to a specific student
+        String accountNumber;  // Unique account number for the student
+        double balance;
+
+        // Constructor to initialize bank account with a student ID, account number, and balance
+        public BankAccount(int studentId, String accountNumber, double balance) {
+            this.studentId = studentId;
+            this.accountNumber = accountNumber;
+            this.balance = balance;
+        }
+
+        // Method to check if the bank account belongs to the student
+        public boolean isValidAccount(String inputAccountNumber) {
+            return this.accountNumber.equals(inputAccountNumber);
+        }
+
+        // Method to check if the bank account has sufficient funds
+        public boolean canPay(double amount) {
+            return balance >= amount;  // Sufficient funds available
+        }
+
+        // Method to deduct the amount from the bank balance
+        public void deductAmount(double amount) {
+            balance -= amount;
+        }
+
+        // Method to check the balance
+        public double getBalance() {
+            return balance;
+        }
+    }
+
+    // Student class to hold student details and payment methods
+    static class Student {
+        String name;
+        int studentId;
+        String course;
+        double courseFee;
+        double paidAmount;
+        BankAccount bankAccount;  // Each student has a linked bank account
+
+        // Constructor to initialize student details and link bank account
+        public Student(String name, int studentId, String course, double courseFee, BankAccount bankAccount) {
+            this.name = name;
+            this.studentId = studentId;
+            this.course = course;
+            this.courseFee = courseFee;
+            this.paidAmount = 0;
+            this.bankAccount = bankAccount;
+        }
+
+        // Method to pay fee
+        public void payFee(double amount) {
+            if (amount > 0) {
+                // Check if bank account is valid and has enough funds
+                if (bankAccount.canPay(amount)) {
+                    paidAmount += amount;
+                    bankAccount.deductAmount(amount);
+                    System.out.println("Payment of Rs." + amount + " is successful.");
+                } else {
+                    System.out.println("Payment cannot be made. Insufficient bank balance.");
+                }
+            } else {
+                System.out.println("Invalid amount.");
+            }
+        }
+
+        // Method to check fee status
+        public void feeStatus() {
+            if (paidAmount < courseFee) {
+                System.out.println("Fee remaining: Rs." + (courseFee - paidAmount));
+            } else {
+                System.out.println("Fee fully paid.");
+            }
+        }
+    }
+
+    // Main method to run the system
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("College Fee Payment System");
+        System.out.println("---------------------------");
+
+        // Take student details as input
+        System.out.print("Enter student name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter student ID: ");
+        int studentId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        // Display available courses
+        System.out.println("Available Courses:");
+        System.out.println("1. Computer Science - Rs.5000");
+        System.out.println("2. Mechanical Engineering - Rs.4500");
+        System.out.println("3. Civil Engineering - Rs.4000");
+        System.out.print("Choose your course (1-3): ");
+        int courseChoice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        String course = "";
+        double courseFee = 0;
+
+        // Set course details based on student's choice
+        switch (courseChoice) {
+            case 1:
+                course = "Computer Science";
+                courseFee = 5000;
+                break;
+            case 2:
+                course = "Mechanical Engineering";
+                courseFee = 4500;
+                break;
+            case 3:
+                course = "Civil Engineering";
+                courseFee = 4000;
+                break;
+            default:
+                System.out.println("Invalid course choice.");
+                return;
+        }
+
+        // Ask for the student's bank account details
+        System.out.print("Enter your bank account number: ");
+        String accountNumber = scanner.nextLine();
+
+        // Initialize BankAccount for the student with a predefined balance (example: Rs. 6000)
+        BankAccount bankAccount = new BankAccount(studentId, accountNumber, 6000);
+        System.out.println("Bank balance: Rs." + bankAccount.getBalance());
+
+        // Create Student object and link it to the BankAccount
+        Student student = new Student(name, studentId, course, courseFee, bankAccount);
+
+        System.out.println("\nStudent Registered: " + student.name + ", Course: " + student.course);
+
+        // Validate bank account before proceeding
+        System.out.print("Please enter your bank account number to verify: ");
+        String inputAccountNumber = scanner.nextLine();
+
+        if (!student.bankAccount.isValidAccount(inputAccountNumber)) {
+            System.out.println("Invalid bank account number. Cannot proceed with the payment.");
+            return;  // Exit if the account number is invalid
+        }
+
+        System.out.println("Bank account verified. Proceeding with payment.");
+
+        // Payment process
+        while (student.paidAmount < student.courseFee) {
+            System.out.println("\nCourse Fee: Rs." + student.courseFee);
+            System.out.println("Paid so far: Rs." + student.paidAmount);
+            student.feeStatus();
+
+            System.out.print("Enter amount to pay (or 0 to exit): Rs.");
+            double amount = scanner.nextDouble();
+
+            if (amount == 0) {
+                System.out.println("Exiting payment process.");
+                break;
+            }
+
+            student.payFee(amount);
+        }
+
+        // Final fee status
+        if (student.paidAmount >= student.courseFee) {
+            System.out.println("\nTotal fee paid: Rs." + student.paidAmount);
+            System.out.println("Payment successful. Thank you!");
+        }
+
+        scanner.close();
+    }
+}
